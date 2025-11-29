@@ -1,0 +1,54 @@
+{
+  "name": "crowdk-backend",
+  "version": "1.0.0",
+  "description": "Backend for CroWDK Wallet - Multi-chain Wallet",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "migrate": "node src/database/migrate-sqlite.js"
+  },
+  "keywords": [
+    "wallet",
+    "crypto",
+    "multi-chain",
+    "ethereum",
+    "tron",
+    "bitcoin"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.95.8",
+    "@tetherto/wdk": "^1.0.0-beta.4",
+    "@tetherto/wdk-protocol-swap-velora-evm": "latest",
+    "@tetherto/wdk-wallet-btc": "^1.0.0-beta.3",
+    "@tetherto/wdk-wallet-evm": "^1.0.0-beta.4",
+    "@tetherto/wdk-wallet-solana": "latest",
+    "@tetherto/wdk-wallet-ton": "^1.0.0-beta.5",
+    "@tetherto/wdk-wallet-tron": "^1.0.0-beta.3",
+    "axios": "^1.8.4",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.10.0",
+    "bip39": "^3.1.0",
+    "bitcoinjs-lib": "^6.1.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.1",
+    "redis": "^4.7.0",
+    "tronweb": "^6.0.0",
+    "uuid": "^11.0.4",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
