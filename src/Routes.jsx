@@ -8,6 +8,7 @@ import WalletCreation from './pages/walet-creation';
 import Receive from './pages/receive';
 import UserDashboard from './pages/user-dashboard';
 import SendTransfer from './pages/send-transfer';
+import Swap from './pages/swap';
 
 const Routes = () => {
   return (
@@ -22,6 +23,7 @@ const Routes = () => {
         <Route path="/receive" element={<Receive />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/send-transfer" element={<SendTransfer />} />
+        <Route path="/swap" element={<Swap />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

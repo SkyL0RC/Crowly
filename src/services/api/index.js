@@ -8,6 +8,7 @@ export * from './transactionService';
 export * from './gasService';
 export * from './networkService';
 export * from './priceService';
+export * from './swapService';
 
 // Default export
 import walletService from './walletService';
@@ -15,6 +16,7 @@ import transactionService from './transactionService';
 import gasService from './gasService';
 import networkService from './networkService';
 import priceService from './priceService';
+import swapService from './swapService';
 
 export default {
   wallet: walletService,
@@ -22,4 +24,5 @@ export default {
   gas: gasService,
   network: networkService,
   price: priceService,
+  swap: swapService,
 };
