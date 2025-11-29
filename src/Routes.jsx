@@ -9,6 +9,7 @@ import Receive from './pages/receive';
 import UserDashboard from './pages/user-dashboard';
 import SendTransfer from './pages/send-transfer';
 import Swap from './pages/swap';
+import History from './pages/history';
 
 const Routes = () => {
   return (
@@ -24,6 +25,7 @@ const Routes = () => {
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/send-transfer" element={<SendTransfer />} />
         <Route path="/swap" element={<Swap />} />
+        <Route path="/history" element={<History />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

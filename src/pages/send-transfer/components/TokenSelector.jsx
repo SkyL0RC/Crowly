@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
 
 const TokenSelector = ({ selectedToken, onTokenSelect, tokens }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,11 +20,13 @@ const TokenSelector = ({ selectedToken, onTokenSelect, tokens }) => {
         className="w-full flex items-center justify-between p-4 bg-surface border border-border rounded-xl hover:border-accent transition-all duration-150"
       >
         <div className="flex items-center gap-3">
-          <Image
-            src={selectedToken?.icon}
-            alt={selectedToken?.iconAlt}
-            className="w-8 h-8 rounded-full"
-          />
+          <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+            <Icon
+              name={selectedToken?.icon}
+              size={20}
+              className="text-accent"
+            />
+          </div>
           <div className="text-left">
             <div className="font-medium text-foreground">{selectedToken?.symbol}</div>
             <div className="text-xs text-muted-foreground">{selectedToken?.name}</div>
@@ -58,11 +59,13 @@ const TokenSelector = ({ selectedToken, onTokenSelect, tokens }) => {
                 className="w-full flex items-center justify-between p-4 hover:bg-background transition-all duration-150 border-b border-border last:border-b-0"
               >
                 <div className="flex items-center gap-3">
-                  <Image
-                    src={token?.icon}
-                    alt={token?.iconAlt}
-                    className="w-8 h-8 rounded-full"
-                  />
+                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Icon
+                      name={token?.icon}
+                      size={20}
+                      className="text-accent"
+                    />
+                  </div>
                   <div className="text-left">
                     <div className="font-medium text-foreground">{token?.symbol}</div>
                     <div className="text-xs text-muted-foreground">{token?.name}</div>

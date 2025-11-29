@@ -15,6 +15,8 @@ const Header = () => {
     { label: 'Dashboard', path: '/user-dashboard', icon: 'LayoutDashboard' },
     { label: 'Send', path: '/send-transfer', icon: 'Send' },
     { label: 'Receive', path: '/receive', icon: 'Download' },
+    { label: 'Swap', path: '/swap', icon: 'ArrowLeftRight' },
+    { label: 'History', path: '/history', icon: 'History' },
     { label: 'Settings', path: '/settings', icon: 'Settings' }
   ];
 
@@ -130,7 +132,7 @@ const Header = () => {
           </Link>
 
           <nav className="nav-menu hidden lg:flex">
-            {navItems?.slice(0, 3)?.map((item) => (
+            {navItems?.slice(0, 5)?.map((item) => (
               <Link
                 key={item?.path}
                 to={item?.path}
