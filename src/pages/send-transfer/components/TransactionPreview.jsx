@@ -1,6 +1,5 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
 
 const TransactionPreview = ({ 
   selectedToken, 
@@ -25,11 +24,13 @@ const TransactionPreview = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-background rounded-lg">
           <div className="flex items-center gap-3">
-            <Image
-              src={selectedToken?.icon}
-              alt={selectedToken?.iconAlt}
-              className="w-10 h-10 rounded-full"
-            />
+            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+              <Icon
+                name={selectedToken?.icon}
+                size={24}
+                className="text-accent"
+              />
+            </div>
             <div>
               <div className="text-sm text-muted-foreground">Sending</div>
               <div className="text-lg font-semibold text-foreground">

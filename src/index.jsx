@@ -1,10 +1,15 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { NetworkProvider } from "./contexts/NetworkContext";
 import "./styles/tailwinds.css";
 import "./styles/index.css";
 
 const container = document.getElementById("root");
 const root = createRoot(container);
 
-root.render(<App />);
+root.render(
+  <NetworkProvider>
+    <App />
+  </NetworkProvider>
+);

@@ -53,7 +53,7 @@ const MascotGuidance = ({ network, selectedSpeed, amount, balance }) => {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="text-sm font-semibold text-foreground">Origami Crow Insight</h4>
+            <h4 className="text-sm font-semibold text-foreground">Crow Insight</h4>
             <Icon name="Sparkles" size={14} color={getIconColor()} />
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">

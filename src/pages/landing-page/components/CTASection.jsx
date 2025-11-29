@@ -33,7 +33,7 @@ const CTASection = () => {
             </h2>
 
             <p className="text-xl text-[#B5B9C3] max-w-3xl mx-auto leading-relaxed">
-              Join thousands of users who trust Tether WDK Wallet for secure, multi-chain cryptocurrency management. Get started in less than 2 minutes.
+              Join thousands of users who trust Crowly for secure, multi-chain cryptocurrency management. Get started in less than 2 minutes.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">

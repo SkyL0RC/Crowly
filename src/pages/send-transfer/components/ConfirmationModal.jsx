@@ -3,38 +3,21 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, transactionData }) => {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, transactionData, password, setPassword, error: externalError, isProcessing }) => {
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
     if (!password) {
-      setError('Password is required to confirm transaction');
       return;
     }
-
-    if (password !== 'SecurePass123!') {
-      setError('Incorrect password. Please try again.');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError('');
-
-    setTimeout(() => {
-      onConfirm();
-      setIsProcessing(false);
-      setPassword('');
-    }, 2000);
+    onConfirm();
   };
 
   const handleClose = () => {
     if (!isProcessing) {
       setPassword('');
-      setError('');
       onClose();
     }
   };
@@ -96,21 +79,30 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, transactionData }) => {
           </div>
 
           <div className="mb-6">
-            <Input
-              type="password"
-              label="Enter Password"
-              placeholder="Enter your wallet password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e?.target?.value);
-                setError('');
-              }}
-              error={error}
-              required
-              disabled={isProcessing}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                label="Enter Password"
+                placeholder="Enter your wallet password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e?.target?.value);
+                }}
+                error={externalError}
+                required
+                disabled={isProcessing}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
+                disabled={isProcessing}
+              >
+                <Icon name={showPassword ? "EyeOff" : "Eye"} size={20} />
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Mock Password: <span className="font-mono text-accent">SecurePass123!</span>
+              Enter the password you used when creating your wallet
             </p>
           </div>
 

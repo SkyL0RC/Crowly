@@ -5,13 +5,14 @@ import MethodSelectionCard from './components/MethodSelectionCard';
 import SeedPhraseDisplay from './components/SeedPhraseDisplay';
 import SeedPhraseVerification from './components/SeedPhraseVerification';
 import ImportWalletForm from './components/ImportWalletForm';
+import LoginForm from './components/LoginForm';
 import OrigamiCrowMascot from './components/OrigamiCrowMascot';
 import ProgressIndicator from './components/ProgressIndicator';
 import SecurityBadges from './components/SecurityBadges';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 import { createWallet, importWallet } from '../../services/api';
-import { encryptAndStoreSeedPhrase, hasStoredWallet } from '../../utils/secureStorage';
+import { encryptAndStoreSeedPhrase, hasStoredWallet, decryptSeedPhrase } from '../../utils/secureStorage';
 
 const WalletCreation = () => {
   const navigate = useNavigate();
@@ -34,7 +35,9 @@ const WalletCreation = () => {
   useEffect(() => {
     // Eğer zaten wallet varsa dashboard'a yönlendir
     if (hasStoredWallet()) {
-      navigate('/user-dashboard');
+      // Login modal göster
+      setSelectedMethod('login');
+      setCurrentStep(1);
     }
   }, [navigate]);
 
@@ -205,6 +208,28 @@ const WalletCreation = () => {
     }
   };
 
+  const handleLogin = async (password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Şifreyi kullanarak seed phrase'i decrypt et
+      const decryptedData = await decryptSeedPhrase(password);
+      
+      if (!decryptedData) {
+        throw new Error('Incorrect password or corrupted data');
+      }
+      
+      // Başarılı login - dashboard'a yönlendir
+      navigate('/user-dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Incorrect password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -225,13 +250,15 @@ const WalletCreation = () => {
               {currentStep === 0 && 'Create Your Wallet'}
               {currentStep === 1 && selectedMethod === 'generate' && 'Your Seed Phrase'}
               {currentStep === 1 && selectedMethod === 'import' && 'Import Your Wallet'}
+              {currentStep === 1 && selectedMethod === 'login' && 'Unlock Your Wallet'}
               {currentStep === 2 && 'Verify Your Seed Phrase'}
               {currentStep === 3 && 'Wallet Created Successfully!'}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {currentStep === 0 && 'Choose how you want to set up your Tether WDK Wallet. Your keys are encrypted and stored securely on your device.'}
+              {currentStep === 0 && 'Choose how you want to set up your Crowly wallet. Your keys are encrypted and stored securely on your device.'}
               {currentStep === 1 && selectedMethod === 'generate' && 'Write down these 12 words in order. This is your seed phrase - the only way to recover your wallet.'}
               {currentStep === 1 && selectedMethod === 'import' && 'Enter your existing wallet credentials to restore access to your funds.'}
+              {currentStep === 1 && selectedMethod === 'login' && 'Enter your password to access your existing wallet.'}
               {currentStep === 2 && 'Confirm you have saved your seed phrase by selecting the correct words.'}
               {currentStep === 3 && 'Your wallet has been created successfully. You can now start managing your crypto assets.'}
             </p>
@@ -296,6 +323,16 @@ const WalletCreation = () => {
               <ImportWalletForm 
                 onImport={handleImportComplete}
                 loading={loading}
+              />
+            </div>
+          )}
+
+          {currentStep === 1 && selectedMethod === 'login' && (
+            <div className="max-w-2xl mx-auto">
+              <LoginForm 
+                onLogin={handleLogin}
+                loading={loading}
+                error={error}
               />
             </div>
           )}

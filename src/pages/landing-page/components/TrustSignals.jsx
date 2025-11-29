@@ -8,7 +8,7 @@ const TrustSignals = () => {
       id: 1,
       icon: 'Shield',
       title: 'Tether Certified',
-      description: 'Official Tether WDK Integration'
+      description: 'Secure Multi-Chain Integration'
     },
     {
       id: 2,
@@ -112,7 +112,7 @@ const TrustSignals = () => {
               </div>
 
               <p className="text-[#B5B9C3] leading-relaxed mb-6">
-                Tether WDK Wallet is built using the official Tether Wallet Development Kit, ensuring compatibility, security, and reliability across all supported blockchain networks.
+                Crowly is built with advanced security standards, ensuring compatibility, security, and reliability across all supported blockchain networks.
               </p>
 
               <div className="grid grid-cols-2 gap-4">

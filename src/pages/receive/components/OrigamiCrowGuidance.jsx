@@ -50,7 +50,7 @@ const OrigimiCrowGuidance = () => {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-foreground">Origami Crow Tips</h3>
+            <h3 className="text-lg font-semibold text-foreground">Crow Insight</h3>
             <div className="px-2 py-0.5 rounded-full bg-accent bg-opacity-20 border border-accent border-opacity-30">
               <span className="text-xs font-medium text-accent-foreground">
                 {currentTip + 1}/{tips?.length}

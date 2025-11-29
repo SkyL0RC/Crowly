@@ -23,7 +23,7 @@ const FeatureCards = () => {
       id: 3,
       icon: 'Code2',
       title: 'Developer-Grade Architecture',
-      description: 'Built on Tether WDK with clean APIs, comprehensive documentation, and extensible architecture.',
+      description: 'Built with clean APIs, comprehensive documentation, and extensible architecture.',
       gradient: 'from-[#5EDFC4] to-[#48D6B0]',
       stats: 'Open Source'
     },

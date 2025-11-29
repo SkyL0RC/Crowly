@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { query } from '../database/connection.js';
-import { getCache, setCache } from '../utils/redis.js';
 
-const PRICE_CACHE_TTL = 60; // 60 seconds
+const PRICE_CACHE_TTL = 60000; // 60 seconds in ms
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
+
+// In-memory cache
+const priceCache = new Map();
 
 /**
  * Get token prices
@@ -14,32 +15,21 @@ export async function getTokenPrices(symbols) {
     
     for (const symbol of symbols) {
       // Check cache first
-      const cacheKey = `price:${symbol}`;
-      const cached = await getCache(cacheKey);
+      const cached = priceCache.get(symbol);
       
-      if (cached) {
-        prices[symbol] = cached;
+      if (cached && Date.now() - cached.timestamp < PRICE_CACHE_TTL) {
+        prices[symbol] = { usd: cached.usd, change24h: cached.change24h };
       } else {
-        // Fetch from database cache
-        const dbPrice = await getPriceFromDb(symbol);
-        
-        if (dbPrice && isRecentPrice(dbPrice.last_updated)) {
-          const priceData = {
-            usd: parseFloat(dbPrice.usd_price),
-            change24h: parseFloat(dbPrice.change_24h),
-          };
-          prices[symbol] = priceData;
-          await setCache(cacheKey, priceData, PRICE_CACHE_TTL);
+        // Fetch from external API
+        const freshPrice = await fetchPriceFromApi(symbol);
+        if (freshPrice) {
+          prices[symbol] = freshPrice;
+          priceCache.set(symbol, {
+            ...freshPrice,
+            timestamp: Date.now()
+          });
         } else {
-          // Fetch from external API
-          const freshPrice = await fetchPriceFromApi(symbol);
-          if (freshPrice) {
-            prices[symbol] = freshPrice;
-            await savePriceToDb(symbol, freshPrice);
-            await setCache(cacheKey, freshPrice, PRICE_CACHE_TTL);
-          } else {
-            prices[symbol] = { usd: 0, change24h: 0 };
-          }
+          prices[symbol] = { usd: 0, change24h: 0 };
         }
       }
     }
@@ -104,52 +94,6 @@ async function fetchPriceFromApi(symbol) {
     console.error(`Error fetching price for ${symbol}:`, error.message);
     return null;
   }
-}
-
-/**
- * Get price from database cache
- */
-async function getPriceFromDb(symbol) {
-  try {
-    const result = await query(
-      'SELECT * FROM price_cache WHERE symbol = $1',
-      [symbol.toUpperCase()]
-    );
-
-    return result.rows[0] || null;
-  } catch (error) {
-    console.error('Get price from DB error:', error);
-    return null;
-  }
-}
-
-/**
- * Save price to database cache
- */
-async function savePriceToDb(symbol, priceData) {
-  try {
-    await query(
-      `INSERT INTO price_cache (symbol, usd_price, change_24h, last_updated)
-       VALUES ($1, $2, $3, NOW())
-       ON CONFLICT (symbol)
-       DO UPDATE SET
-         usd_price = $2,
-         change_24h = $3,
-         last_updated = NOW()`,
-      [symbol.toUpperCase(), priceData.usd, priceData.change24h]
-    );
-  } catch (error) {
-    console.error('Save price to DB error:', error);
-  }
-}
-
-/**
- * Check if price is recent (within 5 minutes)
- */
-function isRecentPrice(lastUpdated) {
-  if (!lastUpdated) return false;
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-  return new Date(lastUpdated) > fiveMinutesAgo;
 }
 
 /**

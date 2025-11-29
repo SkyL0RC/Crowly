@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Header from '../../components/Header';
 import QuickActionsBar from '../../components/QuickActionsBar';
@@ -15,13 +15,18 @@ import MascotGuidance from './components/MascotGuidance';
 import ConfirmationModal from './components/ConfirmationModal';
 import { sendTransaction, getGasEstimate } from '../../services/api';
 import { getWalletBalance } from '../../services/api';
+import { signAndSendSepoliaTransaction, estimateSepoliaGas } from '../../utils/transactionSigner';
+import { useNetwork } from '../../contexts/NetworkContext';
 
 const SendTransfer = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { isTestnet, getExplorerUrl } = useNetwork();
   const [selectedToken, setSelectedToken] = useState(null);
   const [selectedNetwork, setSelectedNetwork] = useState('ethereum');
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
+  const [memo, setMemo] = useState('');
   const [selectedSpeed, setSelectedSpeed] = useState('standard');
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [errors, setErrors] = useState({});
@@ -30,13 +35,39 @@ const SendTransfer = () => {
   const [feeOptions, setFeeOptions] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
   
   const walletAddress = localStorage.getItem('walletAddress') || '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
+
+  // URL parametrelerini oku
+  useEffect(() => {
+    const addressParam = searchParams.get('address');
+    const networkParam = searchParams.get('network');
+    const amountParam = searchParams.get('amount');
+    const memoParam = searchParams.get('memo');
+
+    console.log('URL Parameters:', { addressParam, networkParam, amountParam, memoParam });
+
+    if (addressParam) {
+      setRecipient(addressParam);
+    }
+    if (networkParam) {
+      setSelectedNetwork(networkParam);
+    }
+    if (amountParam) {
+      setAmount(amountParam);
+    }
+    if (memoParam) {
+      setMemo(memoParam);
+      console.log('Memo set to:', memoParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchWalletData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletAddress, selectedNetwork]);
+  }, [walletAddress, selectedNetwork, isTestnet]); // isTestnet değişince de yenile
 
   useEffect(() => {
     if (selectedNetwork) {
@@ -49,38 +80,84 @@ const SendTransfer = () => {
     try {
       setLoading(true);
       
-      // Mock data - wallet yoksa veya backend çalışmıyorsa
-      if (!walletAddress || walletAddress === '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb') {
-        const mockTokens = [
-          {
-            id: 'eth',
-            symbol: 'ETH',
-            name: 'Ethereum',
-            balance: '0.00',
-            usdValue: 0,
-            price: 2000,
-            icon: 'Hexagon',
-            iconAlt: 'Ethereum cryptocurrency coin'
-          },
-          {
-            id: 'usdt',
-            symbol: 'USDT',
-            name: 'Tether USD',
-            balance: '0.00',
-            usdValue: 0,
-            price: 1,
-            icon: 'DollarSign',
-            iconAlt: 'USDT stablecoin'
+      // Gerçek bakiyeyi RPC'den çek
+      if (walletAddress && walletAddress !== '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb') {
+        try {
+          const rpcUrl = isTestnet 
+            ? 'https://ethereum-sepolia-rpc.publicnode.com'
+            : 'https://ethereum-rpc.publicnode.com';
+          
+          const response = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_getBalance',
+              params: [walletAddress, 'latest'],
+              id: 1
+            })
+          });
+          
+          const data = await response.json();
+          const balanceWei = data.result ? parseInt(data.result, 16) : 0;
+          const balanceEth = (balanceWei / 1e18).toFixed(6);
+          
+          console.log('ETH Balance:', balanceEth);
+          
+          const realTokens = [
+            {
+              id: 'eth',
+              symbol: 'ETH',
+              name: 'Ethereum',
+              balance: balanceEth,
+              usdValue: parseFloat(balanceEth) * 2000,
+              price: 2000,
+              icon: 'Hexagon',
+              iconAlt: 'Ethereum cryptocurrency coin'
+            }
+          ];
+          
+          setTokens(realTokens);
+          if (!selectedToken) {
+            setSelectedToken(realTokens[0]);
           }
-        ];
-        
-        setTokens(mockTokens);
-        if (!selectedToken) {
-          setSelectedToken(mockTokens[0]);
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error('Failed to fetch balance:', error);
         }
-        setLoading(false);
-        return;
       }
+      
+      // Mock data - wallet yoksa
+      const mockTokens = [
+        {
+          id: 'eth',
+          symbol: 'ETH',
+          name: 'Ethereum',
+          balance: '0.00',
+          usdValue: 0,
+          price: 2000,
+          icon: 'Hexagon',
+          iconAlt: 'Ethereum cryptocurrency coin'
+        },
+        {
+          id: 'usdt',
+          symbol: 'USDT',
+          name: 'Tether USD',
+          balance: '0.00',
+          usdValue: 0,
+          price: 1,
+          icon: 'DollarSign',
+          iconAlt: 'USDT stablecoin'
+        }
+      ];
+      
+      setTokens(mockTokens);
+      if (!selectedToken) {
+        setSelectedToken(mockTokens[0]);
+      }
+      setLoading(false);
+      return;
       
       const response = await getWalletBalance(walletAddress);
       
@@ -269,7 +346,16 @@ const SendTransfer = () => {
 
   const validateAddress = (address) => {
     if (!address) return 'Recipient address is required';
-    if (address?.length < 20) return 'Invalid address format';
+    
+    // Ethereum address validation (0x + 40 hex characters)
+    if (selectedNetwork === 'ethereum') {
+      if (!address.startsWith('0x')) return 'Address must start with 0x';
+      if (address.length !== 42) return 'Invalid Ethereum address length';
+      if (!/^0x[a-fA-F0-9]{40}$/.test(address)) return 'Invalid Ethereum address format';
+    } else {
+      if (address.length < 20) return 'Invalid address format';
+    }
+    
     return '';
   };
 
@@ -321,9 +407,48 @@ const SendTransfer = () => {
   };
 
   const handleConfirmTransaction = async () => {
+    // Validate password
+    if (!password) {
+      setErrors({ ...errors, password: 'Password is required to sign transaction' });
+      return;
+    }
+
     try {
       setSending(true);
-      
+      setErrors({});
+
+      // Use real Sepolia transaction for Ethereum
+      if (selectedNetwork === 'ethereum') {
+        const result = await signAndSendSepoliaTransaction({
+          to: recipient,
+          amount: amount,
+          password: password,
+          isTestnet: isTestnet, // Network mode'u gönder
+        });
+
+        if (result.success) {
+          setShowConfirmation(false);
+          setPassword('');
+          
+          const explorerUrl = getExplorerUrl('ethereum');
+          
+          setTimeout(() => {
+            navigate('/user-dashboard', {
+              state: {
+                notification: {
+                  type: 'success',
+                  message: `Successfully sent ${amount} ETH to ${recipient.slice(0, 10)}...${recipient.slice(-8)}`,
+                  txHash: result.txHash,
+                  explorerUrl: `${explorerUrl}/tx/${result.txHash}`,
+                }
+              }
+            });
+          }, 500);
+          return;
+        }
+      }
+
+      // Mock transaction for other networks
       const response = await sendTransaction({
         from: walletAddress,
         to: recipient,
@@ -352,8 +477,13 @@ const SendTransfer = () => {
       }
     } catch (error) {
       console.error('Transaction error:', error);
-      setErrors({ ...errors, transaction: error.message || 'Failed to send transaction' });
-      setShowConfirmation(false);
+      setErrors({ 
+        password: error.message.includes('password') || error.message.includes('decrypt') 
+          ? 'Incorrect password' 
+          : '',
+        transaction: error.message || 'Failed to send transaction'
+      });
+      setPassword('');
     } finally {
       setSending(false);
     }
@@ -396,7 +526,7 @@ const SendTransfer = () => {
   return (
     <>
       <Helmet>
-        <title>Send Transfer - Tether WDK Wallet</title>
+        <title>Send Transfer - Crowly</title>
         <meta name="description" content="Send cryptocurrency securely across multiple blockchain networks with optimized fees" />
       </Helmet>
       <Header />
@@ -455,6 +585,25 @@ const SendTransfer = () => {
                       selectedToken={selectedToken}
                       usdValue={calculateUsdValue()}
                       onMaxClick={handleMaxClick} />
+
+                    {memo && (
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-foreground">
+                          Payment Message
+                        </label>
+                        <div className="p-4 glass-card">
+                          <div className="flex items-start gap-3">
+                            <Icon name="MessageSquare" size={20} color="var(--color-accent)" className="flex-shrink-0 mt-1" />
+                            <div className="flex-1">
+                              <div className="text-sm text-muted-foreground mb-1.5">Message from sender:</div>
+                              <div className="text-base text-foreground font-medium leading-relaxed">
+                                "{memo}"
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                   </div>
                 </div>
@@ -530,8 +679,16 @@ const SendTransfer = () => {
       }
       <ConfirmationModal
         isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
+        onClose={() => {
+          setShowConfirmation(false);
+          setShowPasswordInput(false);
+          setPassword('');
+        }}
         onConfirm={handleConfirmTransaction}
+        password={password}
+        setPassword={setPassword}
+        error={errors.password}
+        isProcessing={sending}
         transactionData={{
           amount: amount,
           token: selectedToken?.symbol,

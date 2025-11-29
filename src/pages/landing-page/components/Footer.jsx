@@ -48,10 +48,10 @@ const Footer = () => {
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#26A17B] to-[#48D6B0] flex items-center justify-center">
                 <Icon name="Wallet" size={24} color="#000000" />
               </div>
-              <span className="text-xl font-bold text-white">Tether WDK Wallet</span>
+              <span className="text-xl font-bold text-white">Crowly</span>
             </Link>
             <p className="text-[#B5B9C3] leading-relaxed mb-6">
-              Your secure gateway to multi-chain cryptocurrency management. Built with Tether WDK for the future of decentralized finance.
+              Your secure gateway to multi-chain cryptocurrency management for the future of decentralized finance.
             </p>
             <div className="flex items-center gap-4">
               {socialLinks?.map((social) => (
@@ -135,7 +135,7 @@ const Footer = () => {
         <div className="pt-8 border-t border-[#2A2D32]">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#B5B9C3]">
-              &copy; {currentYear} Tether WDK Wallet. All rights reserved.
+              &copy; {currentYear} Crowly. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">

@@ -71,28 +71,47 @@ const History = () => {
     const statuses = ['completed', 'pending', 'failed'];
     const tokens = ['ETH', 'USDT', 'TRX', 'BTC', 'SOL', 'USDC'];
     
+    // Sabit tutarlar - her transaction için önceden belirlenmiş
+    const fixedAmounts = [
+      0.0012, 0.0023, 0.0031, 0.0018, 0.0027, 0.0021, 0.0035, 0.0015,
+      0.0024, 0.0029, 0.0022, 0.0037, 0.0016, 0.0026, 0.0020, 0.0033,
+      0.0014, 0.0028, 0.0024, 0.0018, 0.0036, 0.0022, 0.0031, 0.0019,
+      0.0025, 0.0016, 0.0030, 0.0022, 0.0027, 0.0019, 0.0033, 0.0015,
+      0.0024, 0.0028, 0.0021, 0.0035, 0.0017, 0.0026, 0.0020, 0.0032,
+      0.0014, 0.0028, 0.0023, 0.0018, 0.0035, 0.0021, 0.0031, 0.0019,
+      0.0025, 0.0016
+    ];
+
+    // Sabit indeksler - her transaction için önceden belirlenmiş
+    const fixedTypeIndices = [0, 1, 0, 2, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 2, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 1];
+    const fixedNetworkIndices = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1];
+    const fixedTokenIndices = [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1];
+    
+    // Sabit tarihler (geriye doğru günler)
+    const baseDate = new Date('2024-11-29T12:00:00Z');
+    
     return Array.from({ length: 50 }, (_, i) => {
-      const type = types[Math.floor(Math.random() * types.length)];
-      const network = networks[Math.floor(Math.random() * networks.length)];
-      const status = i < 45 ? 'completed' : statuses[Math.floor(Math.random() * statuses.length)];
-      const token = tokens[Math.floor(Math.random() * tokens.length)];
-      const amount = (Math.random() * 10).toFixed(4);
-      const date = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+      const type = types[fixedTypeIndices[i]];
+      const network = networks[fixedNetworkIndices[i]];
+      const status = i < 45 ? 'completed' : statuses[i % 3];
+      const token = tokens[fixedTokenIndices[i]];
+      const amount = fixedAmounts[i]; // Sabit tutar kullan
+      const date = new Date(baseDate.getTime() - (i * 12 * 60 * 60 * 1000)); // Her transaction 12 saat öncesi
       
       return {
         id: `tx_${i + 1}`,
-        hash: `0x${Math.random().toString(16).substr(2, 64)}`,
+        hash: `0x${(i + 1).toString(16).padStart(64, '0')}`, // Sabit hash
         type: type,
         network: network,
         token: token,
-        amount: amount,
+        amount: amount.toFixed(4),
         usdValue: (parseFloat(amount) * (token === 'BTC' ? 40000 : token === 'ETH' ? 2000 : 1)).toFixed(2),
         from: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-        to: `0x${Math.random().toString(16).substr(2, 40)}`,
+        to: `0x${(1000 + i).toString(16).padStart(40, '0')}`, // Sabit adres
         status: status,
         timestamp: date.toISOString(),
-        fee: (Math.random() * 5).toFixed(4),
-        confirmations: status === 'completed' ? Math.floor(Math.random() * 100) + 10 : 0
+        fee: (0.0001 * (i + 1)).toFixed(4), // Sabit fee
+        confirmations: status === 'completed' ? 10 + i : 0
       };
     }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   };
@@ -204,7 +223,7 @@ const History = () => {
   return (
     <>
       <Helmet>
-        <title>Transaction History - Crow WDK Wallet</title>
+        <title>Transaction History - Crowly</title>
         <meta 
           name="description" 
           content="View your complete transaction history across all blockchain networks with advanced filtering and export options." 

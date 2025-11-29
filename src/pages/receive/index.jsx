@@ -58,7 +58,7 @@ const Receive = () => {
   return (
     <>
       <Helmet>
-        <title>Receive Cryptocurrency - Tether WDK Wallet</title>
+        <title>Receive Cryptocurrency - Crowly</title>
         <meta 
           name="description" 
           content="Receive cryptocurrency across multiple blockchain networks with secure address generation and QR codes. Support for Ethereum, TRON, Bitcoin, and Solana networks." 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '../../components/Header';
 import QuickActionsBar from '../../components/QuickActionsBar';
 import WalletAddressDisplay from '../../components/WalletAddressDisplay';
@@ -6,25 +7,48 @@ import BalanceOverview from './components/BalanceOverview';
 import NetworkCard from './components/NetworkCard';
 import RecentTransactions from './components/RecentTransactions';
 import OrigamiCrowMascot from './components/OrigamiCrowMascot';
+import Icon from '../../components/AppIcon';
 import { getWalletBalance, getTransactionHistory } from '../../services/api';
+import { useNetwork } from '../../contexts/NetworkContext';
 
 const UserDashboard = () => {
+  const location = useLocation();
+  const { networkMode, isTestnet, getRpcUrl } = useNetwork();
   const [selectedNetwork, setSelectedNetwork] = useState('ethereum');
   const [portfolioData, setPortfolioData] = useState(null);
   const [networks, setNetworks] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   // Kullanıcının cüzdan adresini localStorage'dan al (wallet creation'dan sonra kaydedilecek)
   const walletAddress = localStorage.getItem('walletAddress') || '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
+
+  // Check for notification from navigation state
+  useEffect(() => {
+    if (location.state?.notification) {
+      setNotification(location.state.notification);
+      
+      // Refresh dashboard data to show new transaction
+      fetchDashboardData();
+      
+      // Clear notification after 10 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 10000);
+      
+      // Clear the navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     fetchDashboardData();
     // Her 30 saniyede bir güncelle
     const interval = setInterval(fetchDashboardData, 30000);
     return () => clearInterval(interval);
-  }, [walletAddress]);
+  }, [walletAddress, networkMode]); // networkMode değiştiğinde de yenile
 
   const fetchDashboardData = async () => {
     try {
@@ -74,22 +98,67 @@ const UserDashboard = () => {
           }
         ]);
         
-        setTransactions([]);
+        // Load transactions from localStorage
+        const savedTxs1 = JSON.parse(localStorage.getItem('transactions') || '[]');
+        console.log('📋 Loading transactions from localStorage:', savedTxs1.length, 'total');
+        const formattedTxs1 = savedTxs1.slice(0, 5).map(tx => ({
+          id: tx.txHash,
+          type: 'send',
+          description: `Sent ${tx.amount} ETH`,
+          amount: `${tx.amount} ETH`,
+          usdValue: parseFloat(tx.amount) * 2000,
+          network: tx.network,
+          networkIcon: 'Hexagon',
+          status: tx.status,
+          timestamp: new Date(tx.timestamp).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          txHash: tx.txHash,
+        }));
+        console.log('📋 Formatted transactions:', formattedTxs1.length);
+        setTransactions(formattedTxs1);
         setError(null);
         setLoading(false);
         return;
       }
       
-      // Cüzdan bakiyelerini çek
-      const balanceResponse = await getWalletBalance(walletAddress);
-      
-      if (balanceResponse.success) {
-        const { totalBalance, networks: networkBalances } = balanceResponse.data;
+      // Ethereum bakiye sorgula (Network mode'a göre RPC)
+      try {
+        const rpcUrl = getRpcUrl('ethereum'); // Network mode'a göre RPC URL al
+        console.log(`Fetching balance from ${isTestnet ? 'Sepolia' : 'Mainnet'}:`, rpcUrl);
         
-        // Portfolio verisi
+        const response = await fetch(rpcUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getBalance',
+            params: [walletAddress, 'latest'],
+            id: 1
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`RPC request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message || 'RPC error');
+        }
+        
+        const balanceWei = data.result ? parseInt(data.result, 16) : 0;
+        const balanceEth = balanceWei / 1e18;
+        
+        console.log(`Balance: ${balanceEth} ETH on ${isTestnet ? 'Sepolia' : 'Mainnet'}`);
+        
         setPortfolioData({
-          totalBalance: totalBalance,
-          percentageChange: 5.67, // Bu değer price history'den hesaplanabilir
+          totalBalance: balanceEth * 2000, // Mock ETH price
+          percentageChange: 0,
           lastUpdated: new Date().toLocaleString('en-US', { 
             month: 'short', 
             day: 'numeric', 
@@ -98,40 +167,122 @@ const UserDashboard = () => {
           })
         });
         
-        // Network verilerini formatla
-        const formattedNetworks = networkBalances.map(network => ({
-          id: network.network.toLowerCase(),
-          network: network.network,
-          balance: `${network.balance} ${network.network === 'ethereum' ? 'ETH' : network.network === 'tron' ? 'TRX' : network.network === 'bitcoin' ? 'BTC' : 'SOL'}`,
-          usdValue: network.usdValue,
-          gasInfo: network.gasPrice || 'N/A',
-          status: network.status || 'healthy',
-          icon: network.network === 'ethereum' ? 'Hexagon' : network.network === 'tron' ? 'Triangle' : network.network === 'bitcoin' ? 'Circle' : 'Zap'
-        }));
+        setNetworks([
+          {
+            id: 'ethereum',
+            network: `Ethereum ${isTestnet ? 'Sepolia' : 'Mainnet'}`,
+            balance: `${balanceEth.toFixed(6)} ETH`,
+            usdValue: balanceEth * 2000,
+            gasInfo: '25 Gwei',
+            status: 'healthy',
+            icon: 'Hexagon'
+          },
+          {
+            id: 'tron',
+            network: 'TRON',
+            balance: '0.00 TRX',
+            usdValue: 0,
+            gasInfo: '420 TRX',
+            status: 'healthy',
+            icon: 'Triangle'
+          },
+          {
+            id: 'bitcoin',
+            network: 'Bitcoin',
+            balance: '0.00 BTC',
+            usdValue: 0,
+            gasInfo: '15 sat/vB',
+            status: 'healthy',
+            icon: 'Circle'
+          },
+          {
+            id: 'solana',
+            network: 'Solana',
+            balance: '0.00 SOL',
+            usdValue: 0,
+            gasInfo: '0.00025 SOL',
+            status: 'healthy',
+            icon: 'Zap'
+          }
+        ]);
         
-        setNetworks(formattedNetworks);
-      }
-
-      // Transaction history'yi çek
-      const txResponse = await getTransactionHistory(walletAddress, { limit: 5 });
-      
-      if (txResponse.success) {
-        const formattedTx = txResponse.data.map(tx => ({
-          id: tx.id,
-          type: tx.type,
-          description: `${tx.type === 'receive' ? 'Received' : 'Sent'} ${tx.tokenSymbol}`,
-          amount: `${tx.amount} ${tx.tokenSymbol}`,
-          usdValue: tx.usdValue,
+        // Load transactions from localStorage
+        const savedTxs2 = JSON.parse(localStorage.getItem('transactions') || '[]');
+        const formattedTxs2 = savedTxs2.slice(0, 5).map(tx => ({
+          id: tx.txHash,
+          type: 'send',
+          description: `Sent ${tx.amount} ETH`,
+          amount: `${tx.amount} ETH`,
+          usdValue: parseFloat(tx.amount) * 2000,
           network: tx.network,
-          networkIcon: tx.network === 'ethereum' ? 'Hexagon' : tx.network === 'tron' ? 'Triangle' : tx.network === 'bitcoin' ? 'Circle' : 'Zap',
+          networkIcon: 'Hexagon',
           status: tx.status,
-          timestamp: tx.timestamp
+          timestamp: new Date(tx.timestamp).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          txHash: tx.txHash,
         }));
+        setTransactions(formattedTxs2);
+        setError(null);
+      } catch (rpcError) {
+        console.error('RPC Error:', rpcError);
+        // RPC hatası varsa mock data göster
+        setPortfolioData({
+          totalBalance: 0,
+          percentageChange: 0,
+          lastUpdated: new Date().toLocaleString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })
+        });
         
-        setTransactions(formattedTx);
+        setNetworks([
+          {
+            id: 'ethereum',
+            network: 'Ethereum',
+            balance: '0.00 ETH',
+            usdValue: 0,
+            gasInfo: '25 Gwei',
+            status: 'healthy',
+            icon: 'Hexagon'
+          },
+          {
+            id: 'tron',
+            network: 'TRON',
+            balance: '0.00 TRX',
+            usdValue: 0,
+            gasInfo: '420 TRX',
+            status: 'healthy',
+            icon: 'Triangle'
+          },
+          {
+            id: 'bitcoin',
+            network: 'Bitcoin',
+            balance: '0.00 BTC',
+            usdValue: 0,
+            gasInfo: '15 sat/vB',
+            status: 'healthy',
+            icon: 'Circle'
+          },
+          {
+            id: 'solana',
+            network: 'Solana',
+            balance: '0.00 SOL',
+            usdValue: 0,
+            gasInfo: '0.00025 SOL',
+            status: 'healthy',
+            icon: 'Zap'
+          }
+        ]);
+        
+        setTransactions([]);
+        setError(null);
       }
-
-      setError(null);
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
       // Hata durumunda da mock data göster
@@ -155,6 +306,33 @@ const UserDashboard = () => {
           gasInfo: '25 Gwei',
           status: 'healthy',
           icon: 'Hexagon'
+        },
+        {
+          id: 'tron',
+          network: 'TRON',
+          balance: '0.00 TRX',
+          usdValue: 0,
+          gasInfo: '420 TRX',
+          status: 'healthy',
+          icon: 'Triangle'
+        },
+        {
+          id: 'bitcoin',
+          network: 'Bitcoin',
+          balance: '0.00 BTC',
+          usdValue: 0,
+          gasInfo: '15 sat/vB',
+          status: 'healthy',
+          icon: 'Circle'
+        },
+        {
+          id: 'solana',
+          network: 'Solana',
+          balance: '0.00 SOL',
+          usdValue: 0,
+          gasInfo: '0.00025 SOL',
+          status: 'healthy',
+          icon: 'Zap'
         }
       ]);
       
@@ -166,7 +344,7 @@ const UserDashboard = () => {
   };
 
   useEffect(() => {
-    document.title = 'Dashboard - Tether WDK Wallet';
+    document.title = 'Dashboard - Crowly';
   }, []);
 
   if (loading) {
@@ -186,6 +364,41 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Success Notification */}
+      {notification && (
+        <div className="fixed top-20 right-4 z-50 max-w-md animate-slide-in-right">
+          <div className="bg-surface border border-success rounded-xl shadow-2xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-success bg-opacity-10">
+                <Icon name="CheckCircle2" size={24} className="text-success" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-foreground mb-1">Transaction Successful!</h4>
+                <p className="text-sm text-muted-foreground mb-2">{notification.message}</p>
+                {notification.explorerUrl && (
+                  <a 
+                    href={notification.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
+                  >
+                    View on Explorer
+                    <Icon name="ExternalLink" size={12} />
+                  </a>
+                )}
+              </div>
+              <button 
+                onClick={() => setNotification(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Icon name="X" size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main className="main-content">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {error && (

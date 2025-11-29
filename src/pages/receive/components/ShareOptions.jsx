@@ -16,6 +16,8 @@ const ShareOptions = ({ address, network }) => {
       ...(memo && { memo })
     });
     const link = `${baseUrl}/send-transfer?${params?.toString()}`;
+    console.log('Generated link:', link);
+    console.log('Params:', { address, network, amount, memo });
     setShareLink(link);
     return link;
   };

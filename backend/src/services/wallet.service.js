@@ -1,4 +1,3 @@
-import { query } from '../database/connection.js';
 import { 
   generateMnemonic, 
   validateMnemonic,
@@ -6,16 +5,15 @@ import {
   getAccount,
   getNetworkConfig 
 } from '../config/wdk.config.js';
-import { NotFoundError, ValidationError } from '../middlewares/error.middleware.js';
+import { ValidationError } from '../middlewares/error.middleware.js';
 
 /**
  * ⚠️ SECURITY NOTICE:
  * 
  * Bu servis ASLA seed phrase veya private key saklamaz!
- * Tüm sensitive data frontend'de Web Crypto API ile şifrelenir.
+ * Database kullanmıyoruz - tüm data frontend'de tutulur.
  * 
  * Backend sadece:
- * - Public address saklar
  * - Geçici olarak address generate eder
  * - WDK instance'ları dispose() ile temizler
  * 
@@ -26,10 +24,10 @@ import { NotFoundError, ValidationError } from '../middlewares/error.middleware.
  * Create a new wallet using WDK
  * 
  * ⚠️ SECURITY: Seed phrase ASLA saklanmaz!
- * Response'da seed phrase dönülür ama database'e yazılmaz.
+ * Response'da seed phrase dönülür ama hiçbir yere yazılmaz.
  * Frontend bu seed phrase'i kullanıcı şifresi ile şifreler.
  */
-export async function createWallet({ method, network, seedPhrase, privateKey, userId }) {
+export async function createWallet({ method, network, seedPhrase, privateKey }) {
   let wdk; // WDK instance tracking for cleanup
   
   try {
@@ -89,38 +87,12 @@ export async function createWallet({ method, network, seedPhrase, privateKey, us
       throw new ValidationError(`Invalid method: ${method}`);
     }
 
-    // ✅ Save to database - SADECE public address!
-    // ❌ encrypted_private_key artık saklanmıyor!
-    
-    // Önce aynı wallet zaten var mı kontrol et
-    const existingWallet = await query(
-      `SELECT id, address, network FROM wallets WHERE address = $1 AND network = $2`,
-      [walletData.address, network]
-    );
-    
-    let savedWallet;
-    
-    if (existingWallet.rows.length > 0) {
-      // Wallet zaten var, mevcut kaydı kullan
-      savedWallet = existingWallet.rows[0];
-    } else {
-      // Yeni wallet oluştur
-      const result = await query(
-        `INSERT INTO wallets (user_id, address, network, network_type)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id, address, network, created_at`,
-        [userId || null, walletData.address, network, networkConfig.type]
-      );
-      savedWallet = result.rows[0];
-    }
-
     return {
-      id: savedWallet.id,
-      address: savedWallet.address,
+      address: walletData.address,
       network,
       networkType: networkConfig.type,
       seedPhrase: walletData.mnemonic, // ⚠️ Response'da dön ama ASLA persist etme!
-      createdAt: savedWallet.created_at,
+      createdAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Create wallet error:', error);
@@ -140,8 +112,7 @@ export async function createWallet({ method, network, seedPhrase, privateKey, us
 /**
  * Get wallet balance using WDK
  * 
- * ⚠️ SECURITY: Artık encrypted_private_key yok!
- * Balance sorguları sadece public address ile yapılır.
+ * ⚠️ SECURITY: Balance sorguları sadece public address ile yapılır.
  */
 export async function getWalletBalance(address, network) {
   let wdk;
@@ -150,16 +121,6 @@ export async function getWalletBalance(address, network) {
     const networkConfig = getNetworkConfig(network);
     if (!networkConfig) {
       throw new ValidationError(`Unsupported network: ${network}`);
-    }
-
-    // Wallet'ın database'de olduğunu kontrol et
-    const walletResult = await query(
-      `SELECT id, address, network FROM wallets WHERE address = $1 AND network = $2`,
-      [address, network]
-    );
-
-    if (walletResult.rows.length === 0) {
-      throw new NotFoundError('Wallet not found');
     }
 
     // ⚠️ Balance sorgulama için seed phrase gerekli değil!
@@ -207,106 +168,17 @@ async function getTokenPrice(symbol) {
 }
 
 /**
- * Get wallet by address
- */
-export async function getWalletByAddress(address, network) {
-  try {
-    const result = await query(
-      `SELECT id, user_id, address, network, network_type, public_key, created_at
-       FROM wallets
-       WHERE address = $1 AND network = $2`,
-      [address, network]
-    );
-
-    if (result.rows.length === 0) {
-      throw new NotFoundError('Wallet not found');
-    }
-
-    return result.rows[0];
-  } catch (error) {
-    console.error('Get wallet error:', error);
-    throw error;
-  }
-}
-
-/**
- * Get all wallets for a user
- */
-export async function getUserWallets(userId) {
-  try {
-    const result = await query(
-      `SELECT id, address, network, network_type, public_key, created_at
-       FROM wallets
-       WHERE user_id = $1
-       ORDER BY created_at DESC`,
-      [userId]
-    );
-
-    return result.rows;
-  } catch (error) {
-    console.error('Get user wallets error:', error);
-    throw error;
-  }
-}
-
-/**
  * Import wallet
  * 
- * ⚠️ SECURITY: Password parametresi artık kullanılmıyor!
- * Backward compatibility için kabul ediyoruz ama ignore ediyoruz.
+ * ⚠️ SECURITY: Database kullanmıyoruz!
  * Frontend seed phrase'i kendi şifresiyle şifreleyecek.
  */
-export async function importWallet({ seedPhrase, network, userId }) {
-  return createWallet({ method: 'import', network, seedPhrase, userId });
-}
-
-/**
- * ❌ REMOVED: exportWallet
- * 
- * Backend artık seed phrase saklamıyor!
- * Kullanıcı seed phrase'ini zaten kendi localStorage'ında tutuyor (şifreli).
- * Export gerekirse frontend'den yapılabilir.
- */
-
-/**
- * ❌ REMOVED: getMnemonicForSigning
- * 
- * Backend artık seed phrase saklamıyor!
- * Signing işlemleri frontend'de yapılmalı:
- * 
- * Frontend'de:
- * 1. const { seedPhrase } = await decryptSeedPhrase(password);
- * 2. const wdk = createWDKInstance(seedPhrase);
- * 3. const account = await wdk.getAccount('ethereum', 0);
- * 4. const tx = await account.sendTransaction({...});
- * 5. wdk.dispose();
- * 6. Backend'e sadece signed transaction gönder
- */
-
-/**
- * Delete wallet
- * 
- * ⚠️ SECURITY: Password verification kaldırıldı
- * Backend'de artık seed phrase olmadığı için verify edemeyiz.
- * Frontend'de kullanıcıdan onay alınmalı.
- */
-export async function deleteWallet(walletId) {
-  try {
-    // Delete wallet from database
-    await query('DELETE FROM wallets WHERE id = $1', [walletId]);
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Delete wallet error:', error);
-    throw error;
-  }
+export async function importWallet({ seedPhrase, network }) {
+  return createWallet({ method: 'import', network, seedPhrase });
 }
 
 export default {
   createWallet,
   getWalletBalance,
-  getWalletByAddress,
-  getUserWallets,
   importWallet,
-  deleteWallet,
 };

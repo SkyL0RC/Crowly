@@ -237,7 +237,7 @@ const Swap = () => {
   return (
     <>
       <Helmet>
-        <title>Swap Tokens - Crow WDK Wallet</title>
+        <title>Swap Tokens - Crowly</title>
         <meta 
           name="description" 
           content="Swap cryptocurrencies instantly across multiple networks with the best rates and low fees." 
