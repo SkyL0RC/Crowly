@@ -1,471 +1,251 @@
-# 🦅 Crow WDK Wallet - Multi-Chain Cryptocurrency Wallet
+# 🦅 Crowly - Secure Multi-Chain Crypto Wallet
 
-A modern, secure multi-chain cryptocurrency wallet built with **Tether Wallet Development Kit (WDK)**, featuring AI-powered assistance and beautiful UI/UX.
+> A modern, secure cryptocurrency wallet with AI-powered assistance, real blockchain integration, and beautiful user experience.
 
-![License](https://img.shields.io/badge/license-MIT-green)
-![React](https://img.shields.io/badge/React-18.2.0-blue)
-![Vite](https://img.shields.io/badge/Vite-5.0.0-purple)
+[![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.0.0-646CFF?logo=vite)](https://vitejs.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
 ### 🌐 Multi-Chain Support
-- **Ethereum** - Full ERC-20 token support
-- **TRON** - TRC-20 tokens and TRX transfers
-- **Bitcoin** - Native BTC transactions
-- **Solana** - SPL tokens and SOL transfers
+- **Ethereum Mainnet** - Full ERC-20 token support with real RPC integration
+- **Sepolia Testnet** - Test your transactions risk-free
+- **TRON** - TRC-20 tokens (coming soon)
+- **Bitcoin** - Native BTC transactions (coming soon)
+- **Solana** - SPL tokens (coming soon)
 
-### 🤖 AI Assistant (Crow)
-- Powered by **Google Gemini 2.5 Flash**
-- Real-time streaming chat responses
+### 🤖 AI-Powered Assistant (Crow)
+- **Google Gemini 2.5 Flash** powered chatbot
+- Real-time streaming responses
 - Security tips and transaction guidance
-- Multi-language support ready
+- Gas fee optimization suggestions
+- Multi-language support (Turkish, English)
 
-### 🔐 Security Features
-- Private keys never leave device
-- 256-bit AES encryption
-- BIP39 compliant seed phrase generation
-- Hardware wallet integration ready
+### 🔐 Enterprise-Grade Security
+- **Client-Side Encryption** - Seed phrases never leave your device
+- **Web Crypto API** - AES-256-GCM encryption with PBKDF2 (100k iterations)
+- **BIP-39 Compliant** - Standard 12-word seed phrase generation
+- **Password Protection** - Encrypted local storage with user password
+- **No Database** - Fully client-side wallet management
 
-### 💎 Key Features
-- **Portfolio Management** - Track assets across all chains
-- **Gas Fee Optimization** - Real-time fee estimation
-- **Transaction History** - Detailed transaction tracking with status
-- **QR Code Support** - Easy address sharing and scanning
-- **Responsive Design** - Mobile-first approach
-- **Dark Mode** - Eye-friendly interface
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React 18.2.0** - UI framework
-- **Vite 5.0.0** - Build tool and dev server
-- **React Router 6.0.2** - Client-side routing
-- **Tailwind CSS 3.4.6** - Utility-first styling
-- **Framer Motion 10.16.4** - Smooth animations
-
-### State Management & Forms
-- **Redux Toolkit 2.6.1** - Global state management
-- **React Hook Form 7.55.0** - Form validation
-
-### UI Components
-- **Radix UI** - Accessible component primitives
-- **Lucide React** - Icon library
-- **Recharts 2.15.2** - Data visualization
-
-### AI Integration
-- **Google Generative AI** - Gemini 2.5 Flash model
-- **Streaming responses** - Real-time chat updates
+### 💎 Core Features
+- ✅ **Real Blockchain Integration** - ethers.js v6 for Ethereum transactions
+- ✅ **Testnet/Mainnet Toggle** - Seamless network switching
+- ✅ **Transaction History** - Local storage with last 50 transactions
+- ✅ **Real-Time Balance** - Direct RPC queries to publicnode.com
+- ✅ **Gas Fee Estimation** - Live network gas prices
+- ✅ **QR Code Generation** - Easy address sharing
+- ✅ **Payment Request URLs** - Pre-filled transaction links
+- ✅ **Transaction Notifications** - Success/error feedback with explorer links
+- ✅ **Responsive Design** - Mobile-first, works on all devices
+- ✅ **Dark Theme** - Professional glass-morphism UI
 
 ---
 
-## 📦 Installation
+## 🏗️ Architecture
+
+### Frontend Stack
+```
+React 18.2.0          → UI Framework
+Vite 5.0.0            → Build Tool & Dev Server
+React Router 6.28.0   → Client-side Routing
+Tailwind CSS 3.4.6    → Utility-first Styling
+Framer Motion 10.16.4 → Smooth Animations
+ethers.js 6.13.0      → Ethereum Blockchain Library
+Lucide React          → Icon System
+```
+
+### Backend Stack
+```
+Node.js 18+           → Runtime
+Express 4.18.2        → REST API Framework
+Winston               → Logging
+Axios                 → HTTP Client
+```
+
+### Security Architecture
+```
+Web Crypto API        → Browser-native encryption
+PBKDF2                → Key derivation (100,000 iterations)
+AES-256-GCM           → Symmetric encryption
+BIP-39                → Seed phrase generation
+No Database           → Client-side only storage
+```
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16.x or higher
-- npm or yarn
-- Git
+- **Node.js** 18 or higher
+- **npm** 8 or higher
+- **Google Gemini API Key** (for AI chatbot)
 
-### Clone & Install
+### 1. Clone Repository
 ```bash
-git clone https://github.com/SkyL0RC/croWDK
-cd crow-wdk
+git clone https://github.com/SkyL0RC/Crowly.git
+cd Crowly
+```
+
+### 2. Install Dependencies
+
+**Frontend:**
+```bash
 npm install
 ```
 
-### Environment Setup
-Create a `.env` file in the root directory:
-
-```env
-# Required: Gemini AI for Crow Assistant
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-
-# Optional: Additional services
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_key
-VITE_GOOGLE_ANALYTICS_ID=your_ga_id
+**Backend:**
+```bash
+cd backend
+npm install
 ```
 
-Get your Gemini API key from: https://makersuite.google.com/app/apikey
+### 3. Environment Setup
 
-### Run Development Server
+**Backend** (`backend/.env`):
+```env
+PORT=3000
+NODE_ENV=development
+
+# Google Gemini API
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# CORS
+FRONTEND_URL=http://localhost:4028
+
+# Price Update Interval (milliseconds)
+PRICE_UPDATE_INTERVAL=300000
+```
+
+**Frontend** (`.env` or create if not exists):
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 4. Get Gemini API Key
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with Google account
+3. Create new API key
+4. Copy and paste into `.env` files
+
+### 5. Start Development Servers
+
+**Terminal 1 - Backend:**
 ```bash
-npm run start
-# or
+cd backend
 npm run dev
 ```
 
-The app will be available at `http://localhost:4028`
-
-### Build for Production
+**Terminal 2 - Frontend:**
 ```bash
-npm run build
-npm run serve  # Preview production build
+npm run dev
 ```
+
+**Access Application:**
+- Frontend: http://localhost:4028
+- Backend: http://localhost:3000
 
 ---
 
-## 🏗️ Backend Integration Guide
+## 📱 User Guide
 
-### Important Notes
+### Creating Your Wallet
 
-⚠️ **Tether WDK Integration Required**
-- Backend must use **Tether Wallet Development Kit (WDK)** for all wallet operations
-- WDK handles: wallet creation, key management, transaction signing, multi-chain support
-- Frontend currently uses mock data - all data should come from backend APIs
+1. **Visit Homepage** → Click "Create New Wallet"
+2. **Save Seed Phrase** → Write down 12 words (never share!)
+3. **Verify Seed Phrase** → Select correct words in order
+4. **Set Password** → Enter strong password (min 8 characters)
+5. **Done!** → Your wallet is created and encrypted locally
 
-🔄 **Current State**
-- Mock data is currently hardcoded in frontend components
-- These will be replaced with real API calls once backend is ready
-- See "Mock Data Locations" section below for cleanup points
+### Logging In
 
-### Tether WDK Implementation
+1. **Click "Login here"** on landing page
+2. **Enter Password** → Your seed phrase is decrypted locally
+3. **Access Dashboard** → View balances and manage crypto
 
-Backend should integrate Tether WDK for:
-- **Wallet Generation**: Use WDK's secure key generation
-- **Multi-Chain Support**: Leverage WDK's built-in chain integrations
-- **Transaction Signing**: Use WDK's signing infrastructure
-- **Key Management**: Utilize WDK's encryption standards
+### Sending Transactions
 
-Reference: [Tether WDK Documentation](https://tether.to/wdk)
+1. Navigate to **Send** page
+2. Select **Network** (Testnet/Mainnet)
+3. Enter **Recipient Address** (0x... format)
+4. Enter **Amount** in ETH
+5. Review **Gas Fee** estimate
+6. Enter **Password** to sign transaction
+7. Transaction broadcasts to blockchain
+8. View in **Transaction History**
 
----
+### Network Switching
 
-### Required Backend APIs
+- Click **Testnet/Mainnet** toggle in header
+- Balance auto-refreshes for selected network
+- Orange dot = Testnet, Green dot = Mainnet
 
-The frontend expects the following REST API endpoints:
+### AI Chatbot (Crow)
 
-#### 1. **Wallet Management (via Tether WDK)**
-
-```typescript
-// POST /api/wallet/create
-// Generate new wallet with seed phrase
-Request: {
-  method: 'generate' | 'import',
-  network: 'ethereum' | 'tron' | 'bitcoin' | 'solana',
-  seedPhrase?: string,  // For import only
-  password: string       // For encryption
-}
-
-Response: {
-  address: string,
-  publicKey: string,
-  seedPhrase?: string,  // Only for new generation
-  encryptedPrivateKey: string
-}
-
-// POST /api/wallet/import
-// Import existing wallet
-Request: {
-  seedPhrase: string,
-  network: string,
-  password: string
-}
-
-Response: {
-  address: string,
-  balance: number,
-  tokens: Token[]
-}
-
-// GET /api/wallet/:address/balance
-// Get wallet balance
-Response: {
-  address: string,
-  balance: number,
-  usdValue: number,
-  tokens: [
-    {
-      symbol: string,
-      name: string,
-      balance: number,
-      usdValue: number,
-      contractAddress?: string
-    }
-  ]
-}
-```
-
-#### 2. **Transaction Management**
-
-```typescript
-// POST /api/transaction/send
-// Send transaction
-Request: {
-  from: string,
-  to: string,
-  amount: number,
-  token: string,
-  network: string,
-  feeSpeed: 'slow' | 'standard' | 'fast',
-  password: string  // To decrypt private key
-}
-
-Response: {
-  txHash: string,
-  status: 'pending' | 'success' | 'failed',
-  gasUsed?: number,
-  gasFee: number,
-  timestamp: number
-}
-
-// GET /api/transaction/:address/history
-// Get transaction history
-Query Parameters: {
-  network?: string,
-  limit?: number,
-  offset?: number
-}
-
-Response: {
-  transactions: [
-    {
-      hash: string,
-      type: 'send' | 'receive' | 'swap',
-      from: string,
-      to: string,
-      amount: number,
-      token: string,
-      status: 'pending' | 'success' | 'failed',
-      timestamp: number,
-      gasUsed: number,
-      gasFee: number,
-      confirmations: number
-    }
-  ],
-  total: number
-}
-
-// GET /api/transaction/:txHash
-// Get transaction details
-Response: {
-  hash: string,
-  status: string,
-  confirmations: number,
-  blockNumber: number,
-  timestamp: number,
-  // ... other details
-}
-```
-
-#### 3. **Gas Fee Estimation**
-
-```typescript
-// GET /api/gas/estimate
-// Get current gas prices
-Query Parameters: {
-  network: 'ethereum' | 'tron' | 'bitcoin' | 'solana',
-  transactionType?: 'transfer' | 'contract'
-}
-
-Response: {
-  network: string,
-  slow: {
-    gasPrice: number,
-    estimatedTime: number,  // in seconds
-    cost: number            // in USD
-  },
-  standard: {
-    gasPrice: number,
-    estimatedTime: number,
-    cost: number
-  },
-  fast: {
-    gasPrice: number,
-    estimatedTime: number,
-    cost: number
-  }
-}
-```
-
-#### 4. **Network Status**
-
-```typescript
-// GET /api/network/status
-// Get network health status
-Response: {
-  networks: [
-    {
-      id: string,
-      name: string,
-      status: 'healthy' | 'congested' | 'down',
-      blockHeight: number,
-      avgBlockTime: number,
-      gasPrice: number
-    }
-  ]
-}
-```
-
-#### 5. **Token Prices**
-
-```typescript
-// GET /api/prices
-// Get current token prices
-Query Parameters: {
-  symbols: string[]  // e.g., ['ETH', 'BTC', 'TRX', 'SOL']
-}
-
-Response: {
-  prices: {
-    [symbol: string]: {
-      usd: number,
-      change24h: number
-    }
-  }
-}
-```
-
-### WebSocket Events (Optional but Recommended)
-
-```typescript
-// Subscribe to real-time updates
-ws://your-backend.com/ws
-
-// Events to emit:
-{
-  type: 'transaction_update',
-  data: {
-    txHash: string,
-    status: string,
-    confirmations: number
-  }
-}
-
-{
-  type: 'balance_update',
-  data: {
-    address: string,
-    balance: number,
-    tokens: Token[]
-  }
-}
-
-{
-  type: 'gas_update',
-  data: {
-    network: string,
-    gasPrice: number
-  }
-}
-```
-
-### Security Requirements
-
-1. **Tether WDK Security**
-   - Follow WDK's security best practices
-   - Use WDK's built-in encryption for private keys
-   - Leverage WDK's secure key derivation
-
-2. **Encryption**
-   - Use AES-256 for private key encryption (via WDK)
-   - Store encrypted keys server-side if needed
-   - Never log private keys or seed phrases
-
-3. **Authentication**
-   - Implement JWT or session-based auth
-   - Rate limiting on all endpoints
-   - CORS configuration for allowed origins
-
-4. **Validation**
-   - Validate all addresses before processing (use WDK validators)
-   - Check balance before allowing transactions
-   - Verify signatures using WDK
-
-5. **Best Practices**
-   - Use environment variables for sensitive data
-   - Implement proper error handling
-   - Add request logging (excluding sensitive data)
-   - Set up monitoring and alerts
-
-### Recommended Backend Stack
-
-- **Tether WDK** - Core wallet functionality (REQUIRED)
-- **Node.js + Express** or **NestJS** for API
-- **PostgreSQL** for transaction history and user data
-- **Redis** for caching prices, gas fees, and session data
-- Additional chain libraries if needed beyond WDK
-
-### Database Schema Example
-
-```sql
--- Users table
-CREATE TABLE users (
-  id UUID PRIMARY KEY,
-  email VARCHAR(255) UNIQUE,
-  password_hash VARCHAR(255),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Wallets table
-CREATE TABLE wallets (
-  id UUID PRIMARY KEY,
-  user_id UUID REFERENCES users(id),
-  address VARCHAR(255) NOT NULL,
-  network VARCHAR(50) NOT NULL,
-  encrypted_private_key TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE(user_id, address, network)
-);
-
--- Transactions table
-CREATE TABLE transactions (
-  id UUID PRIMARY KEY,
-  wallet_id UUID REFERENCES wallets(id),
-  tx_hash VARCHAR(255) UNIQUE NOT NULL,
-  type VARCHAR(20) NOT NULL,
-  from_address VARCHAR(255) NOT NULL,
-  to_address VARCHAR(255) NOT NULL,
-  amount DECIMAL(36, 18) NOT NULL,
-  token VARCHAR(50) NOT NULL,
-  status VARCHAR(20) NOT NULL,
-  gas_used DECIMAL(18, 8),
-  gas_fee DECIMAL(18, 8),
-  confirmations INT DEFAULT 0,
-  network VARCHAR(50) NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Indexes
-CREATE INDEX idx_transactions_wallet ON transactions(wallet_id);
-CREATE INDEX idx_transactions_hash ON transactions(tx_hash);
-CREATE INDEX idx_transactions_address ON transactions(from_address, to_address);
-```
+- Click **Crow mascot** on dashboard
+- Ask questions about:
+  - How to send transactions
+  - Gas fee explanations
+  - Security best practices
+  - Network comparisons
+  - Wallet features
 
 ---
 
-## 📁 Project Structure
+## 🗂️ Project Structure
 
 ```
-crow-wdk-wallet/
+Crowly/
 ├── src/
-│   ├── components/          # Shared components
-│   │   ├── ui/              # UI primitives (Button, Input, etc.)
-│   │   ├── Header.jsx
-│   │   ├── QuickActionsBar.jsx
-│   │   └── ...
-│   ├── pages/               # Route pages
-│   │   ├── landing-page/
-│   │   ├── user-dashboard/
-│   │   ├── send-transfer/
-│   │   ├── receive/
-│   │   └── walet-creation/
-│   ├── services/            # API & service layer
-│   │   ├── crowAssistantService.js
-│   │   └── geminiClient.js
-│   ├── utils/               # Utility functions
-│   ├── styles/              # Global styles
-│   │   ├── tailwinds.css
-│   │   └── index.css
-│   ├── App.jsx
-│   ├── Routes.jsx
-│   └── index.jsx
-├── public/                  # Static assets
-├── .env                     # Environment variables
+│   ├── components/         # Reusable UI components
+│   │   ├── Header.jsx      # Navigation with network toggle
+│   │   ├── AppIcon.jsx     # Lucide icon wrapper
+│   │   └── ui/             # Button, Input, Select components
+│   │
+│   ├── pages/
+│   │   ├── landing-page/   # Homepage with hero section
+│   │   ├── wallet-creation/ # Create/Import/Login flows
+│   │   ├── user-dashboard/ # Main dashboard with AI chatbot
+│   │   ├── send-transfer/  # Send crypto page
+│   │   ├── receive/        # QR code & address display
+│   │   └── NotFound.jsx    # 404 page
+│   │
+│   ├── services/
+│   │   ├── api/            # Backend API client
+│   │   ├── geminiClient.js # Google Gemini AI setup
+│   │   └── crowAssistantService.js # Chatbot logic
+│   │
+│   ├── utils/
+│   │   ├── secureStorage.js      # Encryption/decryption
+│   │   └── transactionSigner.js  # Ethereum transaction signing
+│   │
+│   ├── contexts/
+│   │   └── NetworkContext.jsx    # Testnet/Mainnet state
+│   │
+│   ├── styles/
+│   │   └── index.css       # Global styles & Tailwind
+│   │
+│   ├── App.jsx             # Root component
+│   ├── Routes.jsx          # React Router setup
+│   └── index.jsx           # Entry point
+│
+├── backend/
+│   ├── src/
+│   │   ├── routes/         # API endpoints
+│   │   ├── services/       # Business logic (in-memory storage)
+│   │   └── server.js       # Express app
+│   │
+│   └── package.json
+│
+├── public/
+│   ├── crow.png            # Logo/mascot image
+│   └── vite.svg
+│
 ├── package.json
 ├── vite.config.mjs
 ├── tailwind.config.js
@@ -474,187 +254,214 @@ crow-wdk-wallet/
 
 ---
 
-## 🗑️ Mock Data Cleanup
+## 🔐 Security Best Practices
 
-### Files with Mock Data to Replace
+### For Users
+- ✅ **Backup Seed Phrase** - Write on paper, store in safe place
+- ✅ **Strong Password** - Use 12+ characters with symbols
+- ✅ **Verify Addresses** - Always double-check recipient addresses
+- ✅ **Start with Testnet** - Practice with Sepolia before mainnet
+- ❌ **Never Share Seed Phrase** - Not even with support
+- ❌ **Don't Screenshot** - Seed phrases should not be digital
 
-Once backend APIs are ready, replace mock data in these files:
-
-#### Dashboard & Portfolio
-- **`src/pages/user-dashboard/index.jsx`**
-  - Line ~13: `portfolioData` object (totalBalance, percentageChange, lastUpdated)
-  - Line ~24: `networks` array (Ethereum, TRON, Bitcoin, Solana network data)
-  - Line ~63: `transactions` array (recent transaction history)
-  - Replace with API calls to `/api/wallet/:address/balance` and `/api/transaction/:address/history`
-
-#### Send Transfer
-- **`src/pages/send-transfer/index.jsx`**
-  - Line ~28: `tokens` array (USDT, ETH, TRX, BTC, SOL with balances and prices)
-  - Line ~81: `networks` array (network configurations with gas fees)
-  - Replace with API calls to `/api/wallet/:address/balance` and `/api/gas/estimate`
-
-#### Receive Page
-- **`src/pages/receive/index.jsx`**
-  - Line ~14: `networkAddresses` object (hardcoded wallet addresses)
-  - Replace with API call to `/api/wallet/:userId/addresses`
-
-- **`src/pages/receive/components/IncomingTransaction.jsx`**
-  - Line ~6: `transactions` array (incoming transaction mock data)
-  - Replace with API call to `/api/transaction/:address/history?type=receive`
-
-- **`src/pages/receive/components/AddressHistory.jsx`**
-  - Mock address history data (if present)
-  - Replace with API call to `/api/wallet/:address/history`
-
-#### Network Selection
-- **`src/components/Header.jsx`**
-  - Line ~19: `networks` array (network switcher data)
-  - Can be kept as static or fetched from `/api/network/status`
-
-- **`src/pages/receive/components/NetworkSelector.jsx`**
-  - Line ~5: `networks` array
-  - Should match backend supported networks
-
-### API Service Files to Create
-
-Create these service files to handle backend communication:
-
-```javascript
-// src/services/api/walletService.js
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
-
-export const getWalletBalance = async (address, network) => {
-  const { data } = await axios.get(`${API_BASE}/wallet/${address}/balance`, {
-    params: { network }
-  });
-  return data;
-};
-
-export const createWallet = async (walletData) => {
-  const { data } = await axios.post(`${API_BASE}/wallet/create`, walletData);
-  return data;
-};
-
-// src/services/api/transactionService.js
-export const getTransactionHistory = async (address, params) => {
-  const { data } = await axios.get(`${API_BASE}/transaction/${address}/history`, {
-    params
-  });
-  return data;
-};
-
-export const sendTransaction = async (txData) => {
-  const { data } = await axios.post(`${API_BASE}/transaction/send`, txData);
-  return data;
-};
-
-// src/services/api/networkService.js
-export const getNetworkStatus = async () => {
-  const { data } = await axios.get(`${API_BASE}/network/status`);
-  return data;
-};
-
-export const getGasEstimate = async (network, transactionType) => {
-  const { data } = await axios.get(`${API_BASE}/gas/estimate`, {
-    params: { network, transactionType }
-  });
-  return data;
-};
-
-// src/services/api/priceService.js
-export const getTokenPrices = async (symbols) => {
-  const { data } = await axios.get(`${API_BASE}/prices`, {
-    params: { symbols: symbols.join(',') }
-  });
-  return data;
-};
-```
-
-### Environment Variables to Add
-
-Add to `.env`:
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-VITE_WS_URL=ws://localhost:3000
-```
+### Technical Security
+- All seed phrases encrypted with **AES-256-GCM**
+- Key derivation uses **100,000 PBKDF2 iterations**
+- No backend storage of private keys or seed phrases
+- Transaction signing happens **client-side only**
+- RPC endpoints use **CORS-enabled public nodes**
 
 ---
 
-## 🎨 Design System
+## 🌐 Network Configuration
 
-### Color Palette
-- **Primary**: `#26A17B` (Teal)
-- **Accent**: `#48D6B0` (Mint)
-- **Background**: `#000000` (Black)
-- **Surface**: `#1C1E22` (Dark Gray)
-- **Success**: `#48D6B0` (Mint)
-- **Error**: `#E06A6A` (Red)
-- **Warning**: `#F0C674` (Yellow)
+### Ethereum Mainnet
+- **Chain ID:** 1
+- **RPC:** https://ethereum-rpc.publicnode.com
+- **Explorer:** https://etherscan.io
 
-### Typography
-- **Font Family**: Inter (Headings & Body), JetBrains Mono (Code)
-- **Font Weights**: 400, 500, 600, 700
+### Sepolia Testnet
+- **Chain ID:** 11155111
+- **RPC:** https://ethereum-sepolia-rpc.publicnode.com
+- **Explorer:** https://sepolia.etherscan.io
+- **Faucet:** https://sepoliafaucet.com
 
 ---
 
-## 🔌 API Integration Points
+## 🛠️ Development
 
-The frontend is ready for backend integration. Update these service files:
+### Build for Production
+```bash
+# Frontend
+npm run build
+npm run preview
 
-1. `src/services/walletService.js` - Wallet operations
-2. `src/services/transactionService.js` - Transaction handling
-3. `src/services/networkService.js` - Network status
-4. `src/services/priceService.js` - Token prices
-
-Example service structure:
-```javascript
-// src/services/walletService.js
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
-
-export const createWallet = async (data) => {
-  const response = await axios.post(`${API_BASE}/wallet/create`, data);
-  return response.data;
-};
-
-export const getBalance = async (address, network) => {
-  const response = await axios.get(`${API_BASE}/wallet/${address}/balance`, {
-    params: { network }
-  });
-  return response.data;
-};
+# Backend
+cd backend
+npm start
 ```
+
+### Code Quality
+```bash
+# Lint check
+npm run lint
+
+# Format code
+npx prettier --write "src/**/*.{js,jsx}"
+```
+
+### Environment Variables Reference
+
+**Frontend:**
+- `VITE_API_URL` - Backend API endpoint
+- `VITE_GEMINI_API_KEY` - Google Gemini API key
+
+**Backend:**
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Environment (development/production)
+- `GEMINI_API_KEY` - Google Gemini API key
+- `FRONTEND_URL` - CORS allowed origin
+- `PRICE_UPDATE_INTERVAL` - Token price refresh rate (ms)
+
+---
+
+## 🧪 Testing Guide
+
+### Manual Testing Checklist
+
+**Wallet Creation:**
+- [ ] Generate new wallet
+- [ ] Save 12-word seed phrase
+- [ ] Verify seed phrase
+- [ ] Set password (8+ chars)
+- [ ] Access dashboard
+
+**Login System:**
+- [ ] Click "Login here" link
+- [ ] Enter correct password
+- [ ] Dashboard loads with balance
+
+**Network Switching:**
+- [ ] Toggle Testnet ↔ Mainnet
+- [ ] Balance refreshes automatically
+- [ ] Network indicator updates
+
+**Send Transaction (Testnet):**
+- [ ] Get Sepolia ETH from faucet
+- [ ] Enter valid 0x address
+- [ ] Enter amount (< balance)
+- [ ] Gas fee displays
+- [ ] Password confirmation
+- [ ] Transaction broadcasts
+- [ ] View on Sepolia explorer
+
+**AI Chatbot:**
+- [ ] Open Crow chat panel
+- [ ] Send message
+- [ ] Streaming response works
+- [ ] Quick actions work
+- [ ] Chat stays open (doesn't close unexpectedly)
+
+---
+
+## 🐛 Known Issues & Troubleshooting
+
+### Chatbot Closes Unexpectedly
+**Fixed!** - Component memoization added to prevent re-renders
+
+### "No wallet found" Error
+1. Check browser console (F12) for errors
+2. Verify localStorage has `crowdk_encrypted_wallet`
+3. If corrupt, run: `localStorage.clear()` and create new wallet
+
+### Transaction Fails
+1. Ensure sufficient balance (amount + gas fee)
+2. Verify correct network selected
+3. Check address format (starts with 0x, 42 chars)
+4. Try again with higher gas fee
+
+### Balance Shows 0.00 ETH
+1. Confirm wallet has funds (check on Etherscan)
+2. Verify network mode (Testnet vs Mainnet)
+3. Wait for RPC to sync (may take 10-30 seconds)
+4. Check browser console for RPC errors
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+We welcome contributions! Here's how:
+
+1. **Fork** the repository
+2. **Create** feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** changes: `git commit -m 'Add amazing feature'`
+4. **Push** to branch: `git push origin feature/amazing-feature`
+5. **Open** Pull Request
+
+### Contribution Guidelines
+- Follow existing code style (Tailwind CSS, ESLint)
+- Add comments for complex logic
+- Test thoroughly before PR
+- Update README if adding features
 
 ---
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License.
-
----
-
-## 📧 Contact
-
-For backend development questions or API clarifications, please open an issue on GitHub.
+This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Tether Wallet Development Kit
-- Google Gemini AI
-- React & Vite communities
-- All open-source contributors
+- **Google Gemini** - AI-powered chatbot
+- **ethers.js** - Ethereum library
+- **publicnode.com** - Free RPC endpoints
+- **Lucide Icons** - Beautiful icon set
+- **Tailwind CSS** - Utility-first CSS framework
+
+---
+
+## 📞 Support
+
+- **GitHub Issues:** [Report bugs or request features](https://github.com/SkyL0RC/Crowly/issues)
+- **Email:** [Add your email]
+- **Discord:** [Add Discord invite if available]
+
+---
+
+## 🎯 Roadmap
+
+### ✅ Completed
+- [x] Wallet creation & import
+- [x] Password-based encryption
+- [x] Testnet/Mainnet support
+- [x] Real Ethereum transactions
+- [x] Transaction history
+- [x] AI chatbot integration
+- [x] Payment request URLs
+- [x] Responsive design
+
+### 🚧 In Progress
+- [ ] TRON network integration
+- [ ] Bitcoin support
+- [ ] Solana support
+- [ ] Multi-wallet management
+
+### 📋 Planned
+- [ ] Hardware wallet support (Ledger, Trezor)
+- [ ] NFT gallery
+- [ ] DeFi integrations (Uniswap, etc.)
+- [ ] Multi-language UI
+- [ ] Mobile app (React Native)
+- [ ] Browser extension
+
+---
+
+<div align="center">
+
+**Built with ❤️ by the Crowly Team**
+
+[⭐ Star this repo](https://github.com/SkyL0RC/Crowly) | [🐛 Report bug](https://github.com/SkyL0RC/Crowly/issues) | [💡 Request feature](https://github.com/SkyL0RC/Crowly/issues)
+
+</div>
