@@ -45,10 +45,13 @@ const UserDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-    // Her 30 saniyede bir güncelle
-    const interval = setInterval(fetchDashboardData, 30000);
+  }, [walletAddress, networkMode]); // İlk yükleme ve değişikliklerde fetch et
+  
+  useEffect(() => {
+    // Her 60 saniyede bir güncelle (chatbot'u kapatmamak için interval'ı uzatalım)
+    const interval = setInterval(fetchDashboardData, 60000);
     return () => clearInterval(interval);
-  }, [walletAddress, networkMode]); // networkMode değiştiğinde de yenile
+  }, []); // Sadece mount/unmount'ta çalışsın
 
   const fetchDashboardData = async () => {
     try {

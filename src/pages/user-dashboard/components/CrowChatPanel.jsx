@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
 import { streamCrowResponse, handleCrowError } from '../../../services/crowAssistantService';
 
-const CrowChatPanel = ({ isOpen, onClose }) => {
+const CrowChatPanel = memo(({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -57,12 +57,14 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
+      console.log('🤖 Starting Crow response stream...');
       let accumulatedText = '';
       
       const updatedHistory = await streamCrowResponse(
         userMessage?.text,
         chatHistory,
         (chunk) => {
+          console.log('📝 Received chunk:', chunk);
           accumulatedText += chunk;
           setMessages((prev) =>
             prev?.map((msg) =>
@@ -74,8 +76,16 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
         }
       );
 
+      console.log('✅ Stream completed successfully');
       setChatHistory(updatedHistory);
     } catch (error) {
+      console.error('❌ Error in handleSendMessage:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        name: error?.name,
+        stack: error?.stack
+      });
+      
       const errorMessage = handleCrowError(error);
       setMessages((prev) =>
         prev?.map((msg) =>
@@ -85,6 +95,7 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
         )
       );
     } finally {
+      console.log('🏁 handleSendMessage completed, setting loading to false');
       setIsLoading(false);
     }
   };
@@ -92,6 +103,7 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
   const handleKeyPress = (e) => {
     if (e?.key === 'Enter' && !e?.shiftKey) {
       e?.preventDefault();
+      e?.stopPropagation();
       handleSendMessage();
     }
   };
@@ -112,13 +124,12 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - Click disabled to prevent accidental closing */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 pointer-events-none"
           />
 
           {/* Chat Panel */}
@@ -239,13 +250,14 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e?.target?.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   placeholder="Ask Crow anything..."
                   rows={1}
                   className="flex-1 bg-background border border-border rounded-lg px-4 py-3 text-sm resize-none focus:outline-none focus:border-accent transition-colors"
                   disabled={isLoading}
                 />
                 <button
+                  type="button"
                   onClick={handleSendMessage}
                   disabled={!inputValue?.trim() || isLoading}
                   className="px-4 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
@@ -263,6 +275,8 @@ const CrowChatPanel = ({ isOpen, onClose }) => {
       )}
     </AnimatePresence>
   );
-};
+});
+
+CrowChatPanel.displayName = 'CrowChatPanel';
 
 export default CrowChatPanel;

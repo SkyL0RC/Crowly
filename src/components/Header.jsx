@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Icon from './AppIcon';
-import { clearStoredWallet } from '../utils/secureStorage';
+import { clearStoredWallet, hasStoredWallet } from '../utils/secureStorage';
 import { useNetwork } from '../contexts/NetworkContext';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { networkMode, toggleNetwork, isTestnet } = useNetwork();
+
+  // Check if user is logged in
+  useEffect(() => {
+    setIsLoggedIn(hasStoredWallet());
+  }, [location]);
 
   const navItems = [
     { label: 'Dashboard', path: '/user-dashboard', icon: 'LayoutDashboard' },
@@ -75,78 +81,91 @@ const Header = () => {
           </button>
         </div>
         <nav className="mobile-menu-items">
-          {/* Network Toggle for Mobile */}
-          <button
-            onClick={toggleNetwork}
-            className="mobile-nav-item hover:bg-background"
-          >
-            <div className={`w-2 h-2 rounded-full ${isTestnet ? 'bg-warning' : 'bg-success'}`} />
-            <span>{isTestnet ? 'Testnet Mode' : 'Mainnet Mode'}</span>
-            <Icon name="RefreshCw" size={16} className="ml-auto" />
-          </button>
+          {isLoggedIn && (
+            <>
+              {/* Network Toggle for Mobile */}
+              <button
+                onClick={toggleNetwork}
+                className="mobile-nav-item hover:bg-background"
+              >
+                <div className={`w-2 h-2 rounded-full ${isTestnet ? 'bg-warning' : 'bg-success'}`} />
+                <span>{isTestnet ? 'Testnet Mode' : 'Mainnet Mode'}</span>
+                <Icon name="RefreshCw" size={16} className="ml-auto" />
+              </button>
 
-          {navItems?.map((item) => (
-            <Link
-              key={item?.path}
-              to={item?.path}
-              className={`mobile-nav-item ${isActive(item?.path) ? 'active' : ''}`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Icon name={item?.icon} size={20} />
-              <span>{item?.label}</span>
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="mobile-nav-item text-error hover:bg-error hover:bg-opacity-10"
-          >
-            <Icon name="LogOut" size={20} />
-            <span>Çıkış Yap</span>
-          </button>
+              {navItems?.map((item) => (
+                <Link
+                  key={item?.path}
+                  to={item?.path}
+                  className={`mobile-nav-item ${isActive(item?.path) ? 'active' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icon name={item?.icon} size={20} />
+                  <span>{item?.label}</span>
+                </Link>
+              ))}
+              <button
+                onClick={handleLogout}
+                className="mobile-nav-item text-error hover:bg-error hover:bg-opacity-10"
+              >
+                <Icon name="LogOut" size={20} />
+                <span>Çıkış Yap</span>
+              </button>
+            </>
+          )}
+          {!isLoggedIn && (
+            <div className="p-4 text-center text-muted-foreground">
+              <p className="text-sm">Please create or login to your wallet</p>
+            </div>
+          )}
         </nav>
       </div>
       <header className="header-nav">
         <div className="header-container">
-          <Link to="/user-dashboard" className="header-logo">
+          <Link to={isLoggedIn ? "/user-dashboard" : "/"} className="header-logo">
             <div className="logo-icon">
               <Icon name="Wallet" size={24} color="var(--color-accent)" />
             </div>
             <span className="logo-text">Crowly</span>
           </Link>
 
-          <nav className="nav-menu hidden lg:flex">
-            {navItems?.slice(0, 5)?.map((item) => (
-              <Link
-                key={item?.path}
-                to={item?.path}
-                className={`nav-item ${isActive(item?.path) ? 'active' : ''}`}
-              >
-                {item?.label}
-              </Link>
-            ))}
-          </nav>
+          {isLoggedIn && (
+            <>
+              <nav className="nav-menu hidden lg:flex">
+                {navItems?.slice(0, 5)?.map((item) => (
+                  <Link
+                    key={item?.path}
+                    to={item?.path}
+                    className={`nav-item ${isActive(item?.path) ? 'active' : ''}`}
+                  >
+                    {item?.label}
+                  </Link>
+                ))}
+              </nav>
 
-          <div className="nav-actions hidden lg:flex">
-            {/* Network Toggle */}
-            <button
-              onClick={toggleNetwork}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-border hover:border-accent transition-all duration-150"
-              title={`Switch to ${isTestnet ? 'Mainnet' : 'Testnet'}`}
-            >
-              <div className={`w-2 h-2 rounded-full ${isTestnet ? 'bg-warning' : 'bg-success'} animate-pulse`} />
-              <span className="text-sm font-medium text-foreground">
-                {isTestnet ? 'Testnet' : 'Mainnet'}
-              </span>
-            </button>
+              <div className="nav-actions hidden lg:flex">
+                {/* Network Toggle */}
+                <button
+                  onClick={toggleNetwork}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-border hover:border-accent transition-all duration-150"
+                  title={`Switch to ${isTestnet ? 'Mainnet' : 'Testnet'}`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${isTestnet ? 'bg-warning' : 'bg-success'} animate-pulse`} />
+                  <span className="text-sm font-medium text-foreground">
+                    {isTestnet ? 'Testnet' : 'Mainnet'}
+                  </span>
+                </button>
 
-            <button 
-              onClick={handleLogout}
-              className="p-2 rounded-lg bg-surface border border-border hover:border-error hover:bg-error hover:bg-opacity-10 transition-all duration-150"
-              title="Çıkış Yap"
-            >
-              <Icon name="LogOut" size={20} color="var(--color-error)" />
-            </button>
-          </div>
+                <button 
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg bg-surface border border-border hover:border-error hover:bg-error hover:bg-opacity-10 transition-all duration-150"
+                  title="Çıkış Yap"
+                >
+                  <Icon name="LogOut" size={20} color="var(--color-error)" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </header>
     </>

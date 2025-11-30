@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import MethodSelectionCard from './components/MethodSelectionCard';
 import SeedPhraseDisplay from './components/SeedPhraseDisplay';
@@ -16,6 +16,7 @@ import { encryptAndStoreSeedPhrase, hasStoredWallet, decryptSeedPhrase } from '.
 
 const WalletCreation = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [generatedSeedPhrase, setGeneratedSeedPhrase] = useState([]);
@@ -33,13 +34,18 @@ const WalletCreation = () => {
   ];
 
   useEffect(() => {
-    // Eğer zaten wallet varsa dashboard'a yönlendir
-    if (hasStoredWallet()) {
-      // Login modal göster
+    // URL'den mode parametresini kontrol et
+    const mode = searchParams.get('mode');
+    
+    if (mode === 'login') {
+      // Login moduna geç (wallet varsa direkt açılsın, yoksa da açılsın)
       setSelectedMethod('login');
       setCurrentStep(1);
+    } else if (hasStoredWallet() && !mode) {
+      // Eğer wallet varsa ve mode belirtilmemişse dashboard'a yönlendir
+      navigate('/user-dashboard');
     }
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   useEffect(() => {
     if (selectedMethod === 'generate' && currentStep === 1 && generatedSeedPhrase.length === 0) {
@@ -83,15 +89,20 @@ const WalletCreation = () => {
     const password = prompt('🔐 Set a password to secure your wallet:\n(Min 8 characters)');
     
     if (!password || password.length < 8) {
-      setError('Password must be at least 8 characters');
+      alert('❌ Password must be at least 8 characters');
       return;
     }
 
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('💾 Starting wallet save process...');
+      console.log('📝 Wallet data:', walletData);
+      console.log('🔑 Seed phrase length:', generatedSeedPhrase.length);
       
       // Seed phrase'i şifrele ve yerel olarak kaydet
-      await encryptAndStoreSeedPhrase(
+      const saveResult = await encryptAndStoreSeedPhrase(
         generatedSeedPhrase.join(' '),
         password,
         {
@@ -102,19 +113,37 @@ const WalletCreation = () => {
         }
       );
 
+      console.log('✅ Encryption result:', saveResult);
+
       // Wallet metadata'yı da localStorage'a kaydet (şifresiz)
       localStorage.setItem('walletAddress', walletData.address);
       localStorage.setItem('walletNetwork', walletData.network);
+      
+      console.log('✅ Wallet metadata saved to localStorage');
+      
+      // Verify save
+      const stored = localStorage.getItem('crowdk_encrypted_wallet');
+      console.log('🔍 Verification - encrypted wallet exists:', !!stored);
+      
+      if (!stored) {
+        throw new Error('Failed to save encrypted wallet to localStorage');
+      }
       
       setCurrentStep(3);
       setMascotTip('security');
       
       setTimeout(() => {
+        console.log('🚀 Navigating to dashboard...');
         navigate('/user-dashboard');
       }, 2000);
     } catch (err) {
-      console.error('Storage error:', err);
-      setError('Failed to save wallet securely');
+      console.error('❌ Storage error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack
+      });
+      setError(`Failed to save wallet: ${err.message}`);
+      alert(`❌ Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -213,18 +242,39 @@ const WalletCreation = () => {
       setLoading(true);
       setError(null);
       
+      console.log('🔐 Login attempt started...');
+      console.log('📦 Checking localStorage for encrypted wallet...');
+      
+      const stored = localStorage.getItem('crowdk_encrypted_wallet');
+      if (!stored) {
+        console.error('❌ No encrypted wallet found in localStorage');
+        throw new Error('No wallet found. Please create or import a wallet first.');
+      }
+      
+      console.log('✅ Encrypted wallet found, attempting to decrypt...');
+      
       // Şifreyi kullanarak seed phrase'i decrypt et
       const decryptedData = await decryptSeedPhrase(password);
       
-      if (!decryptedData) {
+      console.log('🔓 Decryption result:', decryptedData ? '✅ Success' : '❌ Failed');
+      
+      if (!decryptedData || !decryptedData.seedPhrase) {
+        console.error('❌ Decryption failed or invalid data structure');
         throw new Error('Incorrect password or corrupted data');
       }
+      
+      console.log('✅ Login successful! Redirecting to dashboard...');
       
       // Başarılı login - dashboard'a yönlendir
       navigate('/user-dashboard');
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Incorrect password. Please try again.');
+      console.error('❌ Login error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        name: err.name,
+        stack: err.stack
+      });
+      setError(err.message || 'Incorrect password. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -237,31 +287,38 @@ const WalletCreation = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
             {error && (
-              <div className="mb-4 p-4 bg-error bg-opacity-10 border border-error rounded-lg max-w-2xl mx-auto">
-                <p className="text-error">{error}</p>
+              <div className="mb-6 p-4 bg-error bg-opacity-10 border border-error rounded-lg max-w-2xl mx-auto">
+                <div className="flex items-center gap-2 justify-center">
+                  <Icon name="AlertCircle" size={20} color="var(--color-error)" />
+                  <p className="text-foreground font-medium">{error}</p>
+                </div>
               </div>
             )}
             
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent bg-opacity-20 border border-accent border-opacity-30 rounded-full mb-4">
-              <Icon name="Sparkles" size={16} color="#000000" />
-              <span className="text-sm font-medium text-accent-foreground">Secure Wallet Setup</span>
-            </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              {currentStep === 0 && 'Create Your Wallet'}
-              {currentStep === 1 && selectedMethod === 'generate' && 'Your Seed Phrase'}
-              {currentStep === 1 && selectedMethod === 'import' && 'Import Your Wallet'}
-              {currentStep === 1 && selectedMethod === 'login' && 'Unlock Your Wallet'}
-              {currentStep === 2 && 'Verify Your Seed Phrase'}
-              {currentStep === 3 && 'Wallet Created Successfully!'}
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {currentStep === 0 && 'Choose how you want to set up your Crowly wallet. Your keys are encrypted and stored securely on your device.'}
-              {currentStep === 1 && selectedMethod === 'generate' && 'Write down these 12 words in order. This is your seed phrase - the only way to recover your wallet.'}
-              {currentStep === 1 && selectedMethod === 'import' && 'Enter your existing wallet credentials to restore access to your funds.'}
-              {currentStep === 1 && selectedMethod === 'login' && 'Enter your password to access your existing wallet.'}
-              {currentStep === 2 && 'Confirm you have saved your seed phrase by selecting the correct words.'}
-              {currentStep === 3 && 'Your wallet has been created successfully. You can now start managing your crypto assets.'}
-            </p>
+            {!error && (
+              <>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent bg-opacity-20 border border-accent border-opacity-30 rounded-full mb-4">
+                  <Icon name="Sparkles" size={16} color="#000000" />
+                  <span className="text-sm font-medium text-accent-foreground">Secure Wallet Setup</span>
+                </div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+                  {currentStep === 0 && 'Create Your Wallet'}
+                  {currentStep === 1 && selectedMethod === 'generate' && 'Your Seed Phrase'}
+                  {currentStep === 1 && selectedMethod === 'import' && 'Import Your Wallet'}
+                  {currentStep === 1 && selectedMethod === 'login' && 'Unlock Your Wallet'}
+                  {currentStep === 2 && 'Verify Your Seed Phrase'}
+                  {currentStep === 3 && 'Wallet Created Successfully!'}
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {currentStep === 0 && 'Choose how you want to set up your Crowly wallet. Your keys are encrypted and stored securely on your device.'}
+                  {currentStep === 1 && selectedMethod === 'generate' && 'Write down these 12 words in order. This is your seed phrase - the only way to recover your wallet.'}
+                  {currentStep === 1 && selectedMethod === 'import' && 'Enter your existing wallet credentials to restore access to your funds.'}
+                  {currentStep === 1 && selectedMethod === 'login' && 'Enter your password to access your existing wallet.'}
+                  {currentStep === 2 && 'Confirm you have saved your seed phrase by selecting the correct words.'}
+                  {currentStep === 3 && 'Your wallet has been created successfully. You can now start managing your crypto assets.'}
+                </p>
+              </>
+            )}
           </div>
 
           <ProgressIndicator

@@ -49,7 +49,7 @@ const LoginForm = ({ onLogin, loading, error }) => {
           <div className="p-3 bg-error bg-opacity-10 border border-error rounded-lg">
             <div className="flex items-center gap-2">
               <Icon name="AlertCircle" size={16} color="var(--color-error)" />
-              <p className="text-sm text-error">{error}</p>
+              <p className="text-sm text-foreground">{error}</p>
             </div>
           </div>
         )}

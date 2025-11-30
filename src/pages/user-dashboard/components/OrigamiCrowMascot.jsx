@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import Icon from '../../../components/AppIcon';
 import CrowChatPanel from './CrowChatPanel';
 
-const OrigamiCrowMascot = () => {
+const OrigamiCrowMascot = memo(() => {
   const [currentTip, setCurrentTip] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -119,6 +119,8 @@ const OrigamiCrowMascot = () => {
       <CrowChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </>
   );
-};
+});
+
+OrigamiCrowMascot.displayName = 'OrigamiCrowMascot';
 
 export default OrigamiCrowMascot;

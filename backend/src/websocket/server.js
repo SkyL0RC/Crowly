@@ -209,7 +209,7 @@ export function notifyGasUpdate(network, gasData) {
  * Start periodic updates
  */
 function startPeriodicUpdates(wss) {
-  // Update prices every minute
+  // Update prices every 5 minutes (CoinGecko free tier rate limit)
   setInterval(async () => {
     try {
       await updateAllPrices();
@@ -217,7 +217,7 @@ function startPeriodicUpdates(wss) {
     } catch (error) {
       console.error('Periodic price update failed:', error);
     }
-  }, parseInt(process.env.PRICE_UPDATE_INTERVAL) || 60000);
+  }, parseInt(process.env.PRICE_UPDATE_INTERVAL) || 300000); // 5 minutes instead of 1 minute
 
   // Send heartbeat every 30 seconds
   setInterval(() => {

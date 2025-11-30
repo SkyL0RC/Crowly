@@ -85,22 +85,38 @@ export async function encryptAndStoreSeedPhrase(seedPhrase, password, metadata =
  */
 export async function decryptSeedPhrase(password) {
   try {
+    console.log('🔐 Starting decryption process...');
+    
     // LocalStorage'dan şifreli veriyi al
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
+      console.error('❌ No data found in localStorage with key:', STORAGE_KEY);
       throw new Error('No encrypted wallet found');
     }
 
+    console.log('✅ Found encrypted data in localStorage');
+    
     const encryptedData = JSON.parse(stored);
+    console.log('📦 Encrypted data structure:', {
+      hasSalt: !!encryptedData.salt,
+      hasIv: !!encryptedData.iv,
+      hasEncrypted: !!encryptedData.encrypted,
+      hasMetadata: !!encryptedData.metadata,
+      timestamp: encryptedData.timestamp
+    });
     
     // Array'leri Uint8Array'e çevir
     const salt = new Uint8Array(encryptedData.salt);
     const iv = new Uint8Array(encryptedData.iv);
     const encrypted = new Uint8Array(encryptedData.encrypted);
 
+    console.log('🔑 Deriving encryption key from password...');
+    
     // Encryption key türet
     const key = await deriveKey(password, salt);
 
+    console.log('🔓 Attempting to decrypt with derived key...');
+    
     // Deşifre et
     const decrypted = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv: iv },
@@ -112,6 +128,7 @@ export async function decryptSeedPhrase(password) {
     const seedPhrase = decoder.decode(decrypted);
 
     console.log('✅ Seed phrase decrypted successfully');
+    console.log('📝 Seed phrase length:', seedPhrase.length);
     
     return {
       seedPhrase,
@@ -120,6 +137,14 @@ export async function decryptSeedPhrase(password) {
     };
   } catch (error) {
     console.error('❌ Decryption error:', error);
+    console.error('Error type:', error.name);
+    console.error('Error message:', error.message);
+    
+    // Web Crypto API'den gelen hata tipine göre daha açıklayıcı mesaj
+    if (error.name === 'OperationError' || error.message.includes('decrypt')) {
+      throw new Error('Incorrect password');
+    }
+    
     throw new Error('Invalid password or corrupted data');
   }
 }

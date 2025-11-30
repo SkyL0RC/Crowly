@@ -4,7 +4,7 @@ import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 import NotFound from "pages/NotFound";
 import LandingPage from './pages/landing-page';
-import WalletCreation from './pages/walet-creation';
+import WalletCreation from './pages/wallet-creation';
 import Receive from './pages/receive';
 import UserDashboard from './pages/user-dashboard';
 import SendTransfer from './pages/send-transfer';
