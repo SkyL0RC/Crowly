@@ -2,6 +2,10 @@
 
 > A modern, secure cryptocurrency wallet with AI-powered assistance, real blockchain integration, and beautiful user experience.
 
+demo link: https://github.com/user-attachments/assets/2571a27a-95bc-48a5-a38f-4699b676744d
+
+
+
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0.0-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
